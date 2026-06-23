@@ -1,0 +1,74 @@
+name: Build and push to Cachix
+
+on:
+  push:
+    branches: [main]
+    paths: &paths
+      - pkgs/**
+      - modules/**
+      - flake.nix
+      - flake.lock
+      - overlay.nix
+      - default.nix
+      - shell.nix
+      - .github/workflows/build.yml
+  pull_request:
+    paths: *paths
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            system: x86_64-linux
+          - runner: ubuntu-24.04-arm
+            system: aarch64-linux
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Configure Cachix for pulls
+        if: github.event_name == 'pull_request'
+        uses: cachix/cachix-action@v17
+        with:
+          name: awildleon-nixos-pbs
+          skipPush: true
+
+      - name: Configure Cachix for pulls and pushes
+        if: github.event_name != 'pull_request'
+        uses: cachix/cachix-action@v17
+        with:
+          name: awildleon-nixos-pbs
+          authToken: ${{ secrets.CACHIX }}
+          skipPush: true
+
+      - name: Build packages for ${{ matrix.system }}
+        env:
+          PACKAGES: |
+            proxmox-backup-server
+            proxmox-backup-server-fhs
+        run: |
+          : > paths.txt
+          echo "$PACKAGES" | while read -r pkg; do
+            [ -z "$pkg" ] && continue
+            echo "::group::Building $pkg"
+            nix build --print-build-logs --print-out-paths \
+              ".#packages.${{ matrix.system }}.$pkg" >> paths.txt
+            echo "::endgroup::"
+          done
+
+      - name: Push built packages to Cachix
+        if: github.event_name != 'pull_request'
+        run: |
+          cachix push awildleon-nixos-pbs < paths.txt
