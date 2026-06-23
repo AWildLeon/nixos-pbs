@@ -13,8 +13,10 @@
 # /usr/share/javascript/proxmox-backup, helpers at /usr/lib/<multiarch>/proxmox-backup,
 # /usr/bin/ip from iproute2). /run and /var are bind-mounted from the host
 # automatically; /etc is a private tmpfs that already symlinks the host's
-# passwd/group/shadow/pam.d/ssl, so we additionally bind the writable PBS config
-# dir /etc/proxmox-backup.
+# passwd/group/shadow/ssl. Some target packages provide /etc/pam.d entries,
+# which would otherwise shadow the host PAM stack, so we bind the host PAM
+# directory back over it. We also bind the writable PBS config dir
+# /etc/proxmox-backup.
 let
   base = proxmox-backup-server;
   inherit (base) version;
@@ -26,7 +28,11 @@ let
     inherit name;
     targetPkgs = pkgs: [ base iproute2 ];
     runScript = exec;
-    extraBwrapArgs = [ "--bind-try /etc/proxmox-backup /etc/proxmox-backup" ];
+    extraBwrapArgs = [
+      "--ro-bind-try /etc/pam.d /etc/pam.d"
+      "--ro-bind-try /etc/ssh /etc/ssh"
+      "--bind-try /etc/proxmox-backup /etc/proxmox-backup"
+    ];
   };
 
   # User-facing CLIs (on $PATH) and the daemons the systemd units launch.
