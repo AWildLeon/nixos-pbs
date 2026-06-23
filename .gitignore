@@ -1,0 +1,13 @@
+# Nix build outputs
+/result
+/result-*
+
+# VM runtime disk images
+*.qcow2
+
+# direnv
+/.direnv/
+
+# editor/OS cruft
+*.swp
+.DS_Store
