@@ -38,7 +38,7 @@ time.
   [How it works](#how-it-works) for why this isn't run directly.
 - `pkgs.proxmox-backup-server-fhs`: the runnable package, the base wrapped in an FHS
   environment. This is what the module and the CLIs use.
-- `services.proxmox-backup-server`: a NixOS module that creates the `backup` user/group,
+- `services.proxmox-backup-server`: a NixOS module that creates the `proxmox-backup-server` user/group,
   the runtime/state/cache/log directory tree, PAM auth integration, and the `proxmox-backup`
   / `proxmox-backup-proxy` systemd units plus the daily-update timer.
 

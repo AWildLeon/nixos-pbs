@@ -18,10 +18,10 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    users.groups.backup = { };
-    users.users.backup = {
+    users.groups.proxmox-backup-server = { };
+    users.users.proxmox-backup-server = {
       isSystemUser = true;
-      group = "backup";
+      group = "proxmox-backup-server";
       extraGroups = [ "tape" ];
       home = "/var/lib/proxmox-backup";
       createHome = true;
@@ -34,12 +34,12 @@ in
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ 8007 ];
 
     systemd.tmpfiles.rules = [
-      "d /etc/proxmox-backup 0700 backup backup - -"
-      "d /var/lib/proxmox-backup 0750 backup backup - -"
-      "d /var/log/proxmox-backup 0750 backup backup - -"
-      "d /var/log/proxmox-backup/api 0750 backup backup - -"
-      "d /var/cache/proxmox-backup 0750 backup backup - -"
-      "d /run/proxmox-backup 0750 backup backup - -"
+      "d /etc/proxmox-backup 0700 proxmox-backup-server proxmox-backup-server - -"
+      "d /var/lib/proxmox-backup 0750 proxmox-backup-server proxmox-backup-server - -"
+      "d /var/log/proxmox-backup 0750 proxmox-backup-server proxmox-backup-server - -"
+      "d /var/log/proxmox-backup/api 0750 proxmox-backup-server proxmox-backup-server - -"
+      "d /var/cache/proxmox-backup 0750 proxmox-backup-server proxmox-backup-server - -"
+      "d /run/proxmox-backup 0750 proxmox-backup-server proxmox-backup-server - -"
     ];
 
     systemd.services.proxmox-backup = {
@@ -70,8 +70,8 @@ in
         ExecReload = "${pkgs.coreutils}/bin/kill -HUP $MAINPID";
         PIDFile = "/run/proxmox-backup/proxy.pid";
         Restart = "on-failure";
-        User = "backup";
-        Group = "backup";
+        User = "proxmox-backup-server";
+        Group = "proxmox-backup-server";
       };
     };
 
