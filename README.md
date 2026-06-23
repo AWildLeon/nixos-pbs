@@ -26,7 +26,7 @@ time.
 
 ## Todo
 - [ ] NixOS VM based Tests
-- [ ] Get PAM Login to work... (Broke in my last atempt to use buildFHSEnv)
+- [ ] Real World Testing
 
 ## What you get
 
