@@ -48,6 +48,30 @@ time.
 - A `x86_64-linux` or `aarch64-linux` host. The bundled web UI `.deb` assets are
   `amd64`/`all`, and PBS itself is Linux-only.
 
+## Binary cache
+
+Prebuilt packages are pushed to Cachix from GitHub Actions. To use the cache, add this to
+your Nix configuration:
+
+```nix
+{
+  nix.settings = {
+    substituters = [ "https://awildleon-nixos-pbs.cachix.org" ];
+    trusted-public-keys = [
+      "awildleon-nixos-pbs.cachix.org-1:4kEEBSONGJ0F7Ita/3ZRcTWaR6M7YHXhltJaoEYl3ew="
+    ];
+  };
+}
+```
+
+Or for a single command:
+
+```sh
+nix build .#proxmox-backup-server-fhs \
+  --extra-substituters https://awildleon-nixos-pbs.cachix.org \
+  --extra-trusted-public-keys awildleon-nixos-pbs.cachix.org-1:4kEEBSONGJ0F7Ita/3ZRcTWaR6M7YHXhltJaoEYl3ew=
+```
+
 ## Build
 
 ```sh
