@@ -31,7 +31,7 @@
 # $out dirs onto /usr. See pkgs/proxmox-backup-server-fhs/package.nix.
 let
   pname = "proxmox-backup-server";
-  version = "4.2.0";
+  version = "4.2.2";
 
   nixosPbsRevision = if revision != null then revision else "unknown";
 

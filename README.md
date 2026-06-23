@@ -6,7 +6,7 @@ A native Nix package and NixOS module for [Proxmox Backup Server](https://pbs.pr
 (PBS). No Debian container, no `dpkg` runtime, just a regular Nix derivation and a
 systemd-based service.
 
-The package builds **PBS 4.2.0** from the upstream Proxmox git sources, reusing the same
+The package builds **PBS 4.2.2** from the upstream Proxmox git sources, reusing the same
 source set and Cargo lock basis as the nixpkgs `proxmox-backup-client` package. The web UI
 assets are pulled from the official Proxmox `.deb` archives and stitched together at build
 time.
