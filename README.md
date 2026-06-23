@@ -27,6 +27,8 @@ time.
 ## Todo
 - [ ] NixOS VM based Tests
 - [ ] Real World Testing
+- [ ] Gather Feedback
+- [ ] Upstream to Nixpkgs
 
 ## What you get
 
