@@ -45,6 +45,10 @@
 
   webAssets = [
     (fetchurl {
+      url = "http://download.proxmox.com/debian/pbs/dists/trixie/pbs-no-subscription/binary-amd64/proxmox-backup-docs_4.2.2-1_all.deb";
+      hash = "sha256-zTpQct4Hu1exS/zRdkXPaOvLgjbqaN/YwzFozoeGl1g=";
+    })
+    (fetchurl {
       url = "http://download.proxmox.com/debian/pbs/dists/trixie/pbs-no-subscription/binary-amd64/libjs-extjs_7.0.0-5_all.deb";
       hash = "sha256-RhCa4YCVeaChny/eswvsF06/yRj++pfvy6rOSoZ3RLU=";
     })

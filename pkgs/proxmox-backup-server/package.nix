@@ -17,6 +17,7 @@
   nettle,
   pam,
   installShellFiles,
+  lowdown,
   stdenv,
   # git revision of *this* (nixos-pbs) packaging repo, shown on the dashboard.
   # The flake threads in self.rev or self.dirtyRev; null falls back to "unknown".
@@ -93,6 +94,13 @@ rustPlatform.buildRustPackage {
     python3 ${./www/remove-storage-disks-nav.py}
     python3 ${./www/trim-server-status.py}
     python3 ${./www/swap-repo-status.py}
+
+    # The contextual help buttons ('?') resolve via OnlineHelpInfo.js, whose
+    # links point at /docs/<page>.html. Since the upstream manual now lives under
+    # /docs/proxmox (the /docs root serves our own landing pages), repoint them
+    # so deep help links keep working. Must run before the bundle is assembled.
+    substituteInPlace www/OnlineHelpInfo.js --replace-fail '"link": "/docs/' '"link": "/docs/proxmox/'
+
     python3 ${./www/build-gui-bundle.py}
   '';
 
@@ -124,6 +132,7 @@ rustPlatform.buildRustPackage {
     installShellFiles
     dpkg
     python3
+    lowdown
   ];
 
   buildInputs = [ openssl fuse3 acl systemd util-linux libxcrypt sg3_utils apt nettle pam ];
@@ -144,6 +153,48 @@ rustPlatform.buildRustPackage {
       --replace-fail \
         '${subscriptionMsgLib}' \
         '${subscriptionMsgLib}${unsupportedNote}'
+
+    # Documentation served at /docs by proxmox-backup-proxy (alias ->
+    # /usr/share/doc/proxmox-backup/html). Move the upstream PBS manual under
+    # /docs/proxmox and generate our own landing pages (Markdown -> HTML) at the
+    # /docs root. The proxy alias itself is left untouched.
+    docroot=$out/share/doc/proxmox-backup/html
+    if [ -d "$docroot" ]; then
+      moved=$(mktemp -d)
+      mv "$docroot" "$moved/proxmox"
+      mkdir -p "$docroot"
+      mv "$moved/proxmox" "$docroot/proxmox"
+      rmdir "$moved"
+
+      # The upstream docs ship symlinks that escape the html/ dir (extjs,
+      # font-awesome, mathjax, the PDF). Inserting the proxmox/ level shifted
+      # each one dir deeper, so re-point every symlink with an extra '../', then
+      # drop any that still dangle (e.g. mathjax, which this port does not ship)
+      # so the noBrokenSymlinks fixup check passes.
+      find "$docroot/proxmox" -type l | while read -r l; do
+        ln -sf "../$(readlink "$l")" "$l"
+      done
+      find "$docroot/proxmox" -type l ! -exec test -e {} \; -delete
+
+      # The upstream pages reference assets and their home link by absolute path
+      # (/docs/_static/..., /docs/index.html). Now that the manual is served from
+      # /docs/proxmox, rewrite those absolute refs so images/CSS resolve and the
+      # manual's "home" stays within the manual.
+      find "$docroot/proxmox" -type f \( -name '*.html' -o -name '*.js' -o -name '*.css' \) \
+        -exec sed -i 's#/docs/#/docs/proxmox/#g' {} +
+    else
+      mkdir -p "$docroot"
+    fi
+
+    install -m644 ${./docs/style.css} "$docroot/style.css"
+    for md in ${./docs}/*.md; do
+      name=$(basename "$md" .md)
+      {
+        cat ${./docs/_header.html}
+        lowdown -Thtml "$md"
+        cat ${./docs/_footer.html}
+      } > "$docroot/$name.html"
+    done
 
     # The default Rust installPhase put every binary in $out/bin. The daemons and
     # internal helpers belong in the FHS libexec dir PBS reaches via the hardcoded
