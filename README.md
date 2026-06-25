@@ -91,9 +91,18 @@ instance without touching your host.
 Build and run it:
 
 ```sh
-nix build .#nixosConfigurations.pbs-test-vm.config.system.build.vm -o result-pbs-test-vm
-./result-pbs-test-vm/bin/run-pbs-test-vm
+./scripts/run-vm.sh
 ```
+
+This builds the VM and launches it with all runtime state pinned to `./.vm-state/`
+(gitignored), so the system disk and the secondary datastore disk (`/dev/vdb`, a
+blank 20 GiB image) persist across reboots. Delete `.vm-state/` to start fresh.
+
+> Running the generated `run-pbs-test-vm` script directly also works, but it stores
+> the secondary disk in a throwaway `/tmp/nix-vm.*` dir that is recreated blank on
+> every boot — use `scripts/run-vm.sh` if you want the disk to stick around.
+>
+> For an auto-rebuilding clean-slate dev loop, use `./scripts/dev-loop.sh`.
 
 Then access:
 

@@ -2,8 +2,9 @@
 /result
 /result-*
 
-# VM runtime disk images
+# VM runtime disk images and persistent state (see run-vm.sh)
 *.qcow2
+/.vm-state/
 
 # direnv
 /.direnv/

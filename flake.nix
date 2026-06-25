@@ -66,6 +66,9 @@
                 memorySize = 4096;
                 cores = 4;
                 diskSize = 16384;
+                # Extra blank 20 GiB disk (appears as /dev/vdb) for use as a
+                # PBS datastore. Format and mount it, then point a datastore there.
+                emptyDiskImages = [ 20480 ];
                 forwardPorts = [
                   { from = "host"; host.port = 8007; guest.port = 8007; }
                   { from = "host"; host.port = 2222; guest.port = 22; }
