@@ -78,7 +78,6 @@ rustPlatform.buildRustPackage {
     mkdir -p www/js
     install -m644 ${./www/LogoShim.js} www/LogoShim.js
     install -m644 ${./www/ServerAdministration.js} www/ServerAdministration.js
-    install -m644 ${./www/StorageAndDisks.js} www/panel/StorageAndDisks.js
     install -m644 ${./www/SystemConfiguration.js} www/SystemConfiguration.js
 
     substituteInPlace www/Utils.js \
@@ -91,6 +90,7 @@ rustPlatform.buildRustPackage {
       --replace-fail 'pub const BACKUP_GROUP_NAME: &str = "backup";' 'pub const BACKUP_GROUP_NAME: &str = "proxmox-backup-server";'
 
     python3 ${./www/remove-shell-nav.py}
+    python3 ${./www/remove-storage-disks-nav.py}
     python3 ${./www/trim-server-status.py}
     python3 ${./www/swap-repo-status.py}
     python3 ${./www/build-gui-bundle.py}
