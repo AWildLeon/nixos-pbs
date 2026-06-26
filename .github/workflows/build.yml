@@ -34,10 +34,23 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # NixOS VM tests need an accelerator. x86 runners expose /dev/kvm but not
+      # group-writable by default; this rule fixes the permissions. ARM hosted
+      # runners have no /dev/kvm at all, so QEMU's `accel=kvm:tcg` falls back to
+      # (slower) TCG software emulation there -- the rule is then a harmless no-op.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+            extra-substituters = https://awildleon-nixos-pbs.cachix.org
+            extra-trusted-public-keys = awildleon-nixos-pbs.cachix.org-1:4kEEBSONGJ0F7Ita/3ZRcTWaR6M7YHXhltJaoEYl3ew=
 
       - name: Configure Cachix for pulls
         if: github.event_name == 'pull_request'
@@ -70,8 +83,16 @@ jobs:
             echo "::endgroup::"
           done
 
+      # Gate publishing on the VM test: this runs for both x86_64 and aarch64
+      # (the latter under TCG emulation, so it is slower). If it fails, the push
+      # step below is skipped and nothing is published for this system.
+      - name: Integration test (${{ matrix.system }})
+        run: |
+          nix build --print-build-logs ".#checks.${{ matrix.system }}.integration"
+
       - name: Push and pin to Cachix (keep last 2 per package)
-        if: github.event_name != 'pull_request'
+        # Only on non-PR events, and only if the build + integration test passed.
+        if: success() && github.event_name != 'pull_request'
         run: |
           # Upload the freshly built paths.
           cut -d' ' -f2- builds.txt | cachix push awildleon-nixos-pbs
@@ -83,32 +104,3 @@ jobs:
             cachix pin awildleon-nixos-pbs \
               "${pkg}-${{ matrix.system }}" "$out" --keep-revisions 2
           done < builds.txt
-
-  integration-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-
-      # NixOS VM tests need /dev/kvm; the GitHub runner exposes it but not with
-      # group-writable perms by default.
-      - name: Enable KVM
-        run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
-            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-
-      - uses: cachix/install-nix-action@v31
-        with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-
-      # Pull the (large) PBS build from Cachix instead of rebuilding it.
-      - uses: cachix/cachix-action@v17
-        with:
-          name: awildleon-nixos-pbs
-          skipPush: true
-
-      - name: Run integration test
-        run: |
-          nix build --print-build-logs .#checks.x86_64-linux.integration
