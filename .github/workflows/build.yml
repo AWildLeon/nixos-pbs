@@ -60,19 +60,29 @@ jobs:
             proxmox-backup-server
             proxmox-backup-server-fhs
         run: |
-          : > paths.txt
+          : > builds.txt
           echo "$PACKAGES" | while read -r pkg; do
             [ -z "$pkg" ] && continue
             echo "::group::Building $pkg"
-            nix build --print-build-logs --print-out-paths \
-              ".#packages.${{ matrix.system }}.$pkg" >> paths.txt
+            out=$(nix build --print-build-logs --print-out-paths \
+              ".#packages.${{ matrix.system }}.$pkg")
+            printf '%s %s\n' "$pkg" "$out" >> builds.txt
             echo "::endgroup::"
           done
 
-      - name: Push built packages to Cachix
+      - name: Push and pin to Cachix (keep last 2 per package)
         if: github.event_name != 'pull_request'
         run: |
-          cachix push awildleon-nixos-pbs < paths.txt
+          # Upload the freshly built paths.
+          cut -d' ' -f2- builds.txt | cachix push awildleon-nixos-pbs
+          # Pin each artifact under a stable per-package/system name, retaining
+          # only the two most recent revisions. Older revisions become unpinned
+          # and are reclaimed by Cachix's (size-based) garbage collection, so the
+          # cache keeps just the last two builds of each package per system.
+          while read -r pkg out; do
+            cachix pin awildleon-nixos-pbs \
+              "${pkg}-${{ matrix.system }}" "$out" --keep-revisions 2
+          done < builds.txt
 
   integration-test:
     runs-on: ubuntu-latest
