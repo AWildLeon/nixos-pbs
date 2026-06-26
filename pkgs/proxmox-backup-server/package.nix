@@ -250,7 +250,10 @@ rustPlatform.buildRustPackage {
       via the proxmox-backup-server-fhs package (or the NixOS module), not directly.
     '';
     homepage = "https://pbs.proxmox.com/";
-    license = lib.licenses.agpl3Only;
+    license = with lib.licenses; [
+      agpl3Plus
+      fdl13Plus
+    ];
     platforms = lib.platforms.linux;
   };
 }
