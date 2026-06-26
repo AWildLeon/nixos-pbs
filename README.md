@@ -215,6 +215,40 @@ way nixpkgs handles FHS-assuming software (compare `steam` / `steam-run`):
 The systemd units and the CLIs on `$PATH` all come from `proxmox-backup-server-fhs`, so the
 NixOS module carries no bind-mount plumbing of its own.
 
+### Datastore paths
+
+The daemons run inside the FHS sandbox, but `buildFHSEnv` automatically bind-mounts **every
+top-level host directory** into the sandbox at the same path (recursively, so submounts like a
+ZFS pool or a dedicated disk come along). So datastores on the usual locations **work out of
+the box at their normal host paths** — no prefix or extra config needed:
+
+- `/var/...` (e.g. the default `/var/lib/proxmox-backup/datastores/...`)
+- `/mnt/...`, `/media/...`, `/srv/...`, `/opt/...`
+- `/home/...`, `/root/...`, `/boot/...`, `/tmp/...`
+- any custom top-level mount, e.g. a ZFS pool at `/tank/...` or a disk mounted at `/data/...`
+
+The only top-level names that are **not** bridged are the ones the sandbox owns or ignores:
+`/usr`, `/bin`, `/sbin`, `/lib`, `/lib32`, `/lib64`, `/libexec`, `/nix`, `/dev`, `/proc`, and
+`/etc` — you would not site a datastore in any of those anyway.
+
+The one path that does **not** work is the **bare filesystem root `/`**: the sandbox `/` is a
+throwaway namespace root, so a datastore created directly at `/` is written there and
+**silently vanishes on the next request**. For that case the wrapper also binds the real host
+root in at **`/hostsys`**, so you can address the top of the host filesystem explicitly:
+
+```sh
+proxmox-backup-manager datastore create root /hostsys/subdir
+```
+
+> [!NOTE]
+> Binds are set up when the daemons start, so a filesystem mounted *after* the PBS services
+> are already running won't be visible until you restart them. Declarative `fileSystems`
+> mounts (mounted at boot, before PBS starts) are fine.
+
+> [!WARNING]
+> `/hostsys` exposes the entire host filesystem (read-write) to the PBS daemons, and
+> `proxmox-backup-api` runs as root.
+
 ## Repository layout
 
 ```

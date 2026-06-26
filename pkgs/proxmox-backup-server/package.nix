@@ -45,12 +45,9 @@ let
   # is the unofficial NixOS packaging. The two notices differ in their leading
   # text (one carries an <a> tag, the other a {0} placeholder), so we keep the
   # full source strings and reuse the shared note.
-  unsupportedNote =
-    "<br><br><b>Unsupported NixOS port:</b> this native NixOS setup is experimental and completely unsupported by Proxmox Server Solutions GmbH. Do not contact Proxmox support for issues with this packaging.";
-  subscriptionMsgUI =
-    ''You do not have a valid subscription for this server. Please visit <a target="_blank" href="https://www.proxmox.com/proxmox-backup-server/pricing">www.proxmox.com</a> to get a list of available options.'';
-  subscriptionMsgLib =
-    "You do not have a valid subscription for this server. Please visit {0} to get a list of available options.";
+  unsupportedNote = "<br><br><b>Unsupported NixOS port:</b> this native NixOS setup is experimental and completely unsupported by Proxmox Server Solutions GmbH. Do not contact Proxmox support for issues with this packaging.";
+  subscriptionMsgUI = ''You do not have a valid subscription for this server. Please visit <a target="_blank" href="https://www.proxmox.com/proxmox-backup-server/pricing">www.proxmox.com</a> to get a list of available options.'';
+  subscriptionMsgLib = "You do not have a valid subscription for this server. Please visit {0} to get a list of available options.";
 in
 
 rustPlatform.buildRustPackage {
@@ -107,17 +104,28 @@ rustPlatform.buildRustPackage {
   cargoLock.lockFileContents = builtins.readFile ./Cargo.lock;
 
   cargoBuildFlags = [
-    "--package=proxmox-backup-banner" "--bin=proxmox-backup-banner"
-    "--package=proxmox-backup" "--bin=pbs3to4"
-    "--package=proxmox-backup" "--bin=proxmox-backup-api"
-    "--package=proxmox-backup" "--bin=proxmox-backup-debug"
-    "--package=proxmox-backup" "--bin=proxmox-backup-manager"
-    "--package=proxmox-backup" "--bin=proxmox-backup-proxy"
-    "--package=proxmox-backup" "--bin=proxmox-daily-update"
-    "--package=proxmox-backup" "--bin=proxmox-tape"
-    "--package=proxmox-backup" "--bin=sg-tape-cmd"
-    "--package=pbs-tape" "--bin=pmt"
-    "--package=pbs-tape" "--bin=pmtx"
+    "--package=proxmox-backup-banner"
+    "--bin=proxmox-backup-banner"
+    "--package=proxmox-backup"
+    "--bin=pbs3to4"
+    "--package=proxmox-backup"
+    "--bin=proxmox-backup-api"
+    "--package=proxmox-backup"
+    "--bin=proxmox-backup-debug"
+    "--package=proxmox-backup"
+    "--bin=proxmox-backup-manager"
+    "--package=proxmox-backup"
+    "--bin=proxmox-backup-proxy"
+    "--package=proxmox-backup"
+    "--bin=proxmox-daily-update"
+    "--package=proxmox-backup"
+    "--bin=proxmox-tape"
+    "--package=proxmox-backup"
+    "--bin=sg-tape-cmd"
+    "--package=pbs-tape"
+    "--bin=pmt"
+    "--package=pbs-tape"
+    "--bin=pmtx"
   ];
 
   env = {
@@ -135,7 +143,18 @@ rustPlatform.buildRustPackage {
     lowdown
   ];
 
-  buildInputs = [ openssl fuse3 acl systemd util-linux libxcrypt sg3_utils apt nettle pam ];
+  buildInputs = [
+    openssl
+    fuse3
+    acl
+    systemd
+    util-linux
+    libxcrypt
+    sg3_utils
+    apt
+    nettle
+    pam
+  ];
 
   strictDeps = true;
   doCheck = false;

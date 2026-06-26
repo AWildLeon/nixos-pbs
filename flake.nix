@@ -10,9 +10,13 @@
     flake = false;
   };
 
-  outputs = { self, nixpkgs, ... }:
+  outputs =
+    { self, nixpkgs, ... }:
     let
-      forAllSystems = nixpkgs.lib.genAttrs [ "x86_64-linux" "aarch64-linux" ];
+      forAllSystems = nixpkgs.lib.genAttrs [
+        "x86_64-linux"
+        "aarch64-linux"
+      ];
 
       # Revision of this packaging repo, surfaced on the PBS dashboard.
       # Clean tree -> self.rev; dirty tree -> self.dirtyRev; neither -> null.
@@ -21,18 +25,26 @@
     {
       # Base overlay (overlay.nix) with this repo's revision injected, so the
       # dashboard shows the nixos-pbs commit a consumer pinned.
-      overlays.default = nixpkgs.lib.composeExtensions (import ./overlay.nix)
-        (final: prev: {
+      overlays.default = nixpkgs.lib.composeExtensions (import ./overlay.nix) (
+        final: prev: {
           proxmox-backup-server = prev.proxmox-backup-server.override { inherit revision; };
-        });
+        }
+      );
 
-      packages = forAllSystems (system:
-        let pkgs = import nixpkgs { inherit system; overlays = [ self.overlays.default ]; };
-        in {
+      packages = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
+        in
+        {
           default = pkgs.proxmox-backup-server-fhs;
           proxmox-backup-server = pkgs.proxmox-backup-server;
           proxmox-backup-server-fhs = pkgs.proxmox-backup-server-fhs;
-        });
+        }
+      );
 
       nixosModules.proxmox-backup-server = ./modules/proxmox-backup-server.nix;
       nixosModules.default = self.nixosModules.proxmox-backup-server;
@@ -70,8 +82,16 @@
                 # PBS datastore. Format and mount it, then point a datastore there.
                 emptyDiskImages = [ 20480 ];
                 forwardPorts = [
-                  { from = "host"; host.port = 8007; guest.port = 8007; }
-                  { from = "host"; host.port = 2222; guest.port = 22; }
+                  {
+                    from = "host";
+                    host.port = 8007;
+                    guest.port = 8007;
+                  }
+                  {
+                    from = "host";
+                    host.port = 2222;
+                    guest.port = 22;
+                  }
                 ];
               };
             };

@@ -25,13 +25,14 @@ backups.
 
 - **Service user and group**: PBS runs as `proxmox-backup-server` rather than
   the Debian default `backup`, and keeps its state under
-  `/var/lib/proxmox-backup`.
+  `/var/lib/proxmox-backup` and in `/etc/proxmox-backup`.
 
 - **FHS-wrapped daemons**: PBS hardcodes Debian-style paths such as
   `/usr/share/javascript/proxmox-backup` and
   `/usr/lib/<multiarch>/proxmox-backup`, so the binaries run inside a bubblewrap
   FHS environment that provides them. Prefer the NixOS module options over
-  editing files by hand.
+  editing files by hand. One consequence concerns where datastores may live —
+  see [Datastore paths](#datastore-paths) below.
 
 - **Trimmed web UI**: features that cannot work on an immutable NixOS host are
   removed from the interface. APT updates and repositories, network and time
@@ -42,7 +43,8 @@ backups.
   - **Storage / Disks**: disk management would write `systemd` mount units into
     `/etc/systemd/system`, which is a read-only nix-store path. The matching API
     endpoints are compiled in but will not work. Mount the filesystem
-    declaratively with `fileSystems` instead, then create a datastore on it.
+    declaratively with `fileSystems` instead, then create a datastore on it
+    (its mount path works directly — see [Datastore paths](#datastore-paths)).
 
 - **Documentation**: this page is served at `/docs`, and the upstream manual
   lives at `/docs/proxmox`. The Documentation button in the top bar opens this
@@ -60,6 +62,40 @@ proxmox-backup-manager datastore create main /var/lib/proxmox-backup/datastores/
 The web UI does the same thing through **Add Datastore**. Once a datastore
 exists, follow the [upstream manual](proxmox/index.html) for backup clients,
 scheduling, pruning, verification, and sync jobs.
+
+### Datastore paths
+
+The daemons run inside the FHS sandbox, but the wrapper automatically
+bind-mounts **every top-level host directory** into the sandbox at the same path
+(recursively, so submounts such as a ZFS pool or a dedicated disk come along).
+So datastores on the usual locations **work out of the box at their normal host
+paths** — no prefix or extra setup needed:
+
+- `/var/...` (e.g. the default `/var/lib/proxmox-backup/datastores/...`)
+- `/mnt/...`, `/media/...`, `/srv/...`, `/opt/...`
+- `/home/...`, `/root/...`, `/boot/...`, `/tmp/...`
+- any custom top-level mount, e.g. a ZFS pool at `/tank/...` or a disk at
+  `/data/...`
+
+The only top-level names that are **not** bridged are the ones the sandbox owns
+or ignores — `/usr`, `/bin`, `/sbin`, `/lib`, `/lib32`, `/lib64`, `/libexec`,
+`/nix`, `/dev`, `/proc`, `/etc` — and you would not site a datastore in any of
+those anyway.
+
+The one path that does **not** work is the **bare filesystem root `/`**: the
+sandbox `/` is a throwaway namespace root, so a datastore created directly at `/`
+is written there and **silently vanishes on the next request**. For that case
+the wrapper also binds the real host root in at **`/hostsys`**, so you can
+address the top of the host filesystem explicitly (e.g. datastore path
+`/hostsys`).
+
+Two caveats:
+
+- Binds are set up when the daemons start, so a filesystem mounted *after* the
+  PBS services are running is not visible until you restart them. Declarative
+  `fileSystems` mounts (mounted at boot) are fine.
+- `/hostsys` exposes the entire host filesystem (read-write) to the PBS daemons,
+  and the API daemon runs as root.
 
 To install the port on your own host, or to see the module options, read the
 [README](https://github.com/AWildLeon/nixos-pbs#readme).

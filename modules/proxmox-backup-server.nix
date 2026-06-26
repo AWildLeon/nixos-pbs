@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.services.proxmox-backup-server;
@@ -61,7 +66,10 @@ in
     systemd.services.proxmox-backup-proxy = {
       description = "Proxmox Backup API Proxy Server";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "proxmox-backup.service" ];
+      after = [
+        "network.target"
+        "proxmox-backup.service"
+      ];
       requires = [ "proxmox-backup.service" ];
       serviceConfig = {
         Type = "notify";
