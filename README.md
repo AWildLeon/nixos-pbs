@@ -1,5 +1,5 @@
 # Proxmox Backup Server for NixOS (experimental)
-
+[![Build and push to Cachix](https://github.com/AWildLeon/nixos-pbs/actions/workflows/build.yml/badge.svg)](https://github.com/AWildLeon/nixos-pbs/actions/workflows/build.yml)
 ![Proxmox Backup Server running natively on NixOS](screenshot1.png)
 
 A native Nix package and NixOS module for [Proxmox Backup Server](https://pbs.proxmox.com/)
