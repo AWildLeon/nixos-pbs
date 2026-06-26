@@ -39,6 +39,9 @@ jobs:
       # runners have no /dev/kvm at all, so QEMU's `accel=kvm:tcg` falls back to
       # (slower) TCG software emulation there -- the rule is then a harmless no-op.
       - name: Enable KVM
+        # Only x86 runners have /dev/kvm; ARM has none, so the VM test there runs
+        # under TCG emulation and this step would fail (no kvm device to trigger).
+        if: matrix.system == 'x86_64-linux'
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
             | sudo tee /etc/udev/rules.d/99-kvm4all.rules
