@@ -64,6 +64,23 @@
             services.proxmox-backup-server = {
               enable = true;
               openFirewall = true;
+
+              # Declarative config demo: reconciled by proxmox-backup-setup.service
+              # on boot. Lives on the root fs so the VM boots without formatting
+              # the secondary /dev/vdb disk first.
+              ensureDatastores.main = {
+                path = "/var/lib/proxmox-backup/datastores/main";
+                comment = "Test store";
+                gcSchedule = "daily";
+              };
+              ensurePruneJobs.main-prune = {
+                datastore = "main";
+                schedule = "daily";
+                settings = {
+                  keep-daily = 7;
+                  keep-weekly = 4;
+                };
+              };
             };
 
             services.openssh = {

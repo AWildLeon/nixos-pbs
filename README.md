@@ -184,11 +184,76 @@ proxmox-backup-manager datastore create main /var/lib/proxmox-backup/datastores/
 
 ### Module options
 
-| Option                                        | Type    | Default                          | Description                                 |
-| --------------------------------------------- | ------- | -------------------------------- | ------------------------------------------- |
-| `services.proxmox-backup-server.enable`       | bool    | `false`                          | Enable the Proxmox Backup Server service.   |
-| `services.proxmox-backup-server.package`      | package | `pkgs.proxmox-backup-server-fhs` | The PBS package to use.                     |
-| `services.proxmox-backup-server.openFirewall` | bool    | `false`                          | Open TCP port `8007` for the web/API proxy. |
+| Option                                        | Type                  | Default                          | Description                                                   |
+| --------------------------------------------- | --------------------- | -------------------------------- | ------------------------------------------------------------ |
+| `services.proxmox-backup-server.enable`       | bool                  | `false`                          | Enable the Proxmox Backup Server service.                    |
+| `services.proxmox-backup-server.package`      | package               | `pkgs.proxmox-backup-server-fhs` | The PBS package to use.                                       |
+| `services.proxmox-backup-server.openFirewall` | bool                  | `false`                          | Open TCP port `8007` for the web/API proxy.                  |
+| `services.proxmox-backup-server.sslCertificate`    | nullOr path           | `null`                           | PEM cert to serve; `null` uses PBS's self-signed cert.       |
+| `services.proxmox-backup-server.sslCertificateKey` | nullOr path           | `null`                           | PEM private key matching `sslCertificate`.                   |
+| `services.proxmox-backup-server.ensureDatastores`   | attrsOf (submodule)   | `{ }`                            | Datastores to create/update on activation.                   |
+| `services.proxmox-backup-server.ensurePruneJobs`    | attrsOf (submodule)   | `{ }`                            | Prune jobs to create/update on activation.                   |
+| `services.proxmox-backup-server.ensureVerifyJobs`   | attrsOf (submodule)   | `{ }`                            | Verification jobs to create/update on activation.            |
+| `services.proxmox-backup-server.ensureSyncJobs`     | attrsOf (submodule)   | `{ }`                            | Sync jobs to create/update on activation.                    |
+
+### Custom TLS certificate
+
+By default PBS serves a self-signed certificate it generates on first start. To
+use your own, point both options at PEM files:
+
+```nix
+services.proxmox-backup-server = {
+  sslCertificate = "/run/secrets/pbs/cert.pem";    # cert (chain)
+  sslCertificateKey = config.age.secrets.pbsKey.path; # matching private key
+};
+```
+
+The files are **copied** (not symlinked) into `/etc/proxmox-backup/proxy.{pem,key}`
+before the daemons start, so PBS uses them instead of generating a self-signed
+cert; unset either option and it falls back to the self-signed one. Keep the key
+out of the world-readable Nix store — reference a path from your secrets tooling
+(agenix/sops-nix). When the source files change, the daemons restart and re-copy
+them (so a renewed cert is picked up on the next `nixos-rebuild switch`).
+
+### Declarative datastores and jobs
+
+Datastores and prune/verify/sync jobs can be declared in Nix instead of clicking
+through the UI. On activation a `proxmox-backup-setup` oneshot service reconciles
+them through `proxmox-backup-manager`: each declared resource is **created if
+missing and updated to match** otherwise. Anything you create in the GUI but do
+not declare here is left untouched (no deletion).
+
+```nix
+services.proxmox-backup-server = {
+  enable = true;
+  openFirewall = true;
+
+  ensureDatastores.main = {
+    path = "/mnt/backup/main";   # parent must exist (e.g. a `fileSystems` mount)
+    comment = "Primary store";
+    gcSchedule = "daily";
+  };
+
+  ensurePruneJobs.main-prune = {
+    datastore = "main";
+    schedule = "daily";
+    settings = { keep-daily = 7; keep-weekly = 4; };
+  };
+
+  ensureVerifyJobs.main-verify = {
+    datastore = "main";
+    schedule = "sun 02:00";
+  };
+};
+```
+
+Each submodule exposes a few first-class options (`path`/`datastore`,
+`comment`, `gcSchedule`, `schedule`, `disable`) plus a freeform `settings`
+attrset for any other PBS flag — keys use the kebab-case spelling PBS expects
+(e.g. `keep-daily`) and map to `--<key> <value>`. The datastore `path` is the
+host path; remember a datastore on the bare root `/` needs the `/hostsys` prefix
+(see [Datastore paths](#datastore-paths)). Remotes are not managed yet, so a
+remote-backed sync job needs its remote created in the GUI first.
 
 ## How it works
 

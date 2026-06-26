@@ -63,6 +63,16 @@ The web UI does the same thing through **Add Datastore**. Once a datastore
 exists, follow the [upstream manual](proxmox/index.html) for backup clients,
 scheduling, pruning, verification, and sync jobs.
 
+### Declarative datastores and jobs
+
+This port can also manage datastores and prune/verify/sync jobs declaratively
+from your NixOS configuration, so a host comes up with them already in place. A
+`proxmox-backup-setup` service reconciles the declared resources on activation —
+creating them if missing and updating them to match — while leaving anything you
+add by hand in the GUI untouched. See the
+[README](https://github.com/AWildLeon/nixos-pbs#declarative-datastores-and-jobs)
+for the options and examples.
+
 ### Datastore paths
 
 The daemons run inside the FHS sandbox, but the wrapper automatically
