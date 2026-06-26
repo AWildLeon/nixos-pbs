@@ -46,6 +46,17 @@
         }
       );
 
+      # End-to-end NixOS VM test. Run: nix build .#checks.<system>.integration
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+        in
+        {
+          integration = import ./tests/integration.nix { inherit self pkgs; };
+        }
+      );
+
       nixosModules.proxmox-backup-server = ./modules/proxmox-backup-server.nix;
       nixosModules.default = self.nixosModules.proxmox-backup-server;
 
