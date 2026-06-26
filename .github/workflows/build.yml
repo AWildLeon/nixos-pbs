@@ -52,6 +52,9 @@ jobs:
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+            # Advertise the kvm feature so the VM test is schedulable on ARM
+            # runners (which lack /dev/kvm); QEMU falls back to TCG at runtime.
+            extra-system-features = kvm
             extra-substituters = https://awildleon-nixos-pbs.cachix.org
             extra-trusted-public-keys = awildleon-nixos-pbs.cachix.org-1:4kEEBSONGJ0F7Ita/3ZRcTWaR6M7YHXhltJaoEYl3ew=
 
