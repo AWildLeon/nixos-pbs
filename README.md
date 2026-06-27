@@ -340,7 +340,10 @@ there:
 - Runtime service behavior under real backup/restore/sync/GC workloads.
 - Generated docs and manpages.
 - PAM / authentication integration beyond basic `root@pam` login.
-- Privileged tape helper setup (`pmt`, `pmtx`, `sg-tape-cmd`).
+- **Tape backup is untested and likely does not work.** The tape tooling
+  (`proxmox-tape`, `pmt`, `pmtx`, `sg-tape-cmd`) is built and the UI is left in
+  place, but it has not been exercised on this port and is not expected to work
+  as-is. If you need tape, please open an issue so it can be looked at.
 - Assumptions that only hold on Debian-style systems.
 
 Contributions and bug reports are welcome.

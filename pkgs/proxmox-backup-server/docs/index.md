@@ -117,8 +117,13 @@ real-world testing:
 
 - Backup, restore, sync, and garbage collection under real workloads.
 - PAM and authentication beyond a basic `root@pam` login.
-- The privileged tape helpers (`pmt`, `pmtx`, `sg-tape-cmd`).
 - Anything that assumes a Debian-style host.
+
+**Tape backup is untested and likely does not work.** The tape tooling
+(`proxmox-tape`, `pmt`, `pmtx`, `sg-tape-cmd`) is built and its UI is left in
+place, but it has not been exercised on this port and is not expected to work
+as-is. If you need tape, please open an
+[issue](https://github.com/AWildLeon/nixos-pbs/issues) so it can be looked at.
 
 Feedback is the fastest way to move this from experimental to trusted. If you
 run it, please report results, good or bad, on the
