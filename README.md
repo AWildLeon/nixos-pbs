@@ -25,9 +25,10 @@ time.
 > relying on it for anything you care about.
 
 ## Todo
-- [ ] NixOS VM based Tests
-- [ ] Real World Testing
-- [ ] Gather Feedback
+- [X] NixOS VM based Tests
+- [X] Real World Testing
+- [X] Gather Feedback
+- [ ] Wait on The Proxmox Trademark Situation
 - [ ] Upstream to Nixpkgs
 
 ## What you get
