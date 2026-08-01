@@ -101,8 +101,7 @@ rustPlatform.buildRustPackage {
         '${subscriptionMsgUI}${unsupportedNote}'
 
     substituteInPlace pbs-buildcfg/src/lib.rs \
-      --replace-fail 'pub const BACKUP_USER_NAME: &str = "backup";' 'pub const BACKUP_USER_NAME: &str = "proxmox-backup-server";' \
-      --replace-fail 'pub const BACKUP_GROUP_NAME: &str = "backup";' 'pub const BACKUP_GROUP_NAME: &str = "proxmox-backup-server";'
+      --replace-fail 'pub const BACKUP_USER_NAME: &str = "backup";' 'pub const BACKUP_USER_NAME: &str = "proxmox-backup-server";'
 
     python3 ${./www/remove-shell-nav.py}
     python3 ${./www/remove-storage-disks-nav.py}

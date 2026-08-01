@@ -4,16 +4,22 @@ Date: Mon, 23 Feb 2026 10:58:20 +0100
 Subject: [PATCH proxmox-backup 1/2] cargo: re-route dependencies not available
  on crates.io
 
+Extended for 4.2.3 to also re-route the new proxmox-syslog-api dependency,
+which has no path override (commented out or otherwise) in upstream's
+Cargo.toml.
+
 Signed-off-by: Christoph Heiss <christoph@c8h4.io>
+Co-authored-by: Leon Hubrich <git@leon-hubrich.de>
+Assisted-by: Claude Sonnet 5 (claude-sonnet-5)
 ---
- Cargo.toml | 104 ++++++++++++++++++++++++++---------------------------
- 1 file changed, 52 insertions(+), 52 deletions(-)
+ Cargo.toml | 105 +++++++++++++++++++++++++++--------------------------
+ 1 file changed, 53 insertions(+), 52 deletions(-)
 
 diff --git a/Cargo.toml b/Cargo.toml
-index 3e036f54e..2d97df9fd 100644
+index a886095..e760279 100644
 --- a/Cargo.toml
 +++ b/Cargo.toml
-@@ -277,59 +277,59 @@ proxmox-rrd-api-types.workspace = true
+@@ -279,59 +279,60 @@ proxmox-rrd-api-types.workspace = true
  # Local path overrides
  # NOTE: You must run `cargo update` after changing this for it to take effect!
  [patch.crates-io]
@@ -109,22 +115,22 @@ index 3e036f54e..2d97df9fd 100644
 +proxmox-sortable-macro = { path = "../proxmox/proxmox-sortable-macro" }
 +proxmox-subscription = { path = "../proxmox/proxmox-subscription" }
 +proxmox-sys = { path = "../proxmox/proxmox-sys" }
++proxmox-syslog-api = { path = "../proxmox/proxmox-syslog-api" }
 +proxmox-systemd = { path = "../proxmox/proxmox-systemd" }
 +proxmox-tfa = { path = "../proxmox/proxmox-tfa" }
 +proxmox-time = { path = "../proxmox/proxmox-time" }
 +proxmox-upgrade-checks = { path = "../proxmox/proxmox-upgrade-checks" }
 +proxmox-uuid = { path = "../proxmox/proxmox-uuid" }
 +proxmox-worker-task = { path = "../proxmox/proxmox-worker-task" }
- 
+
 -#proxmox-fuse = {path = "../proxmox-fuse" }
 -#pathpatterns = {path = "../pathpatterns" }
 -#pxar = { path = "../pxar" }
 +proxmox-fuse = {path = "../proxmox-fuse" }
 +pathpatterns = {path = "../pathpatterns" }
 +pxar = { path = "../pxar" }
- 
+
  [features]
  default = []
--- 
+--
 2.53.0
-
