@@ -19,6 +19,7 @@
   installShellFiles,
   lowdown,
   stdenv,
+  libcap,
   # updateScript dependencies (passthru only; not used by the build itself).
   writeShellApplication,
   curl,
@@ -170,6 +171,7 @@ rustPlatform.buildRustPackage {
     apt
     nettle
     pam
+    libcap
   ];
 
   strictDeps = true;
