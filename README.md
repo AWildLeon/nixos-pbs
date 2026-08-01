@@ -2,6 +2,10 @@
 [![Build and push to Cachix](https://github.com/AWildLeon/nixos-pbs/actions/workflows/build.yml/badge.svg)](https://github.com/AWildLeon/nixos-pbs/actions/workflows/build.yml)
 ![Proxmox Backup Server running natively on NixOS](screenshot1.png)
 
+
+NixOS PR:
+https://github.com/NixOS/nixpkgs/pull/543254
+
 A native Nix package and NixOS module for [Proxmox Backup Server](https://pbs.proxmox.com/)
 (PBS). No Debian container, no `dpkg` runtime, just a regular Nix derivation and a
 systemd-based service.
