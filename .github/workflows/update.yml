@@ -1,0 +1,72 @@
+name: Update packages
+
+# Bumps Proxmox Backup Server to the newest released .deb version: refreshes
+# pkgs/proxmox-backup-server/sources.json (git pins, web assets) and regenerates
+# Cargo.lock via the package's update script, then opens (or refreshes) a PR.
+# The PR triggers build.yml, which builds both systems and runs the VM test.
+#
+# flake.lock (nixpkgs) and GitHub Actions bumps are handled by Dependabot.
+#
+# NOTE: PRs opened with the default GITHUB_TOKEN do not trigger other workflows.
+# To have build.yml run on these PRs automatically, add a fine-grained PAT (or
+# GitHub App token) with contents + pull-requests write access as the
+# `UPDATE_TOKEN` secret. Without it the PR is still opened; close and reopen it
+# to kick off CI.
+
+on:
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-packages
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Run proxmox-backup-server update script
+        id: update
+        run: |
+          old=$(jq -r .version pkgs/proxmox-backup-server/sources.json)
+          nix run .#update
+          new=$(jq -r .version pkgs/proxmox-backup-server/sources.json)
+          echo "old=$old" >> "$GITHUB_OUTPUT"
+          echo "new=$new" >> "$GITHUB_OUTPUT"
+
+      # Sanity check before opening a PR: the new sources must at least evaluate
+      # (fetcher hashes, Cargo.lock parse). The full build + VM test runs in
+      # build.yml on the PR.
+      - name: Evaluate package
+        run: nix eval --raw .#packages.x86_64-linux.proxmox-backup-server.drvPath
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.UPDATE_TOKEN || github.token }}
+          branch: update/proxmox-backup-server
+          delete-branch: true
+          commit-message: |
+            proxmox-backup-server: ${{ steps.update.outputs.old }} -> ${{ steps.update.outputs.new }}
+          title: "proxmox-backup-server: ${{ steps.update.outputs.old }} -> ${{ steps.update.outputs.new }}"
+          body: |
+            Automated update via `nix run .#update`.
+
+            - version: `${{ steps.update.outputs.old }}` → `${{ steps.update.outputs.new }}`
+            - refreshed git pins, web asset .debs and `Cargo.lock`
+
+            Review `sources.json` and the `Cargo.lock` diff; CI builds both
+            systems and runs the integration test.
+          labels: dependencies

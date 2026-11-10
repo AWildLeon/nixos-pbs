@@ -46,6 +46,26 @@
         }
       );
 
+      # Refreshes pkgs/proxmox-backup-server/{sources.json,Cargo.lock} to the
+      # newest released PBS. Run from the repo root: nix run .#update
+      # (used by .github/workflows/update.yml).
+      apps = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs {
+            inherit system;
+            overlays = [ self.overlays.default ];
+          };
+        in
+        {
+          update = {
+            type = "app";
+            program = pkgs.proxmox-backup-server.passthru.updateScript;
+            meta.description = "Update the pinned Proxmox Backup Server sources and Cargo.lock";
+          };
+        }
+      );
+
       # End-to-end NixOS VM test. Run: nix build .#checks.<system>.integration
       checks = forAllSystems (
         system:
