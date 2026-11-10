@@ -1,7 +1,7 @@
 {
   description = "Experimental native Nix package/module for Proxmox Backup Server";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
   # Used only by default.nix / shell.nix to expose these outputs to
   # consumers without flakes enabled. Pinned here so it lands in flake.lock.

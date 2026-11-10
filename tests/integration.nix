@@ -50,7 +50,11 @@ pkgs.testers.runNixOSTest {
     users.users.root.password = rootPassword;
 
     environment.systemPackages = [
-      pkgs.proxmox-backup-client
+      # nixos-unstable's proxmox-backup-client fails to build: zstd-sys can no
+      # longer find libzstd via pkg-config. Add it until fixed upstream.
+      (pkgs.proxmox-backup-client.overrideAttrs (old: {
+        buildInputs = (old.buildInputs or [ ]) ++ [ pkgs.zstd ];
+      }))
       pkgs.openssl
       pkgs.jq
     ];

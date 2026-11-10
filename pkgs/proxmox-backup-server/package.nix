@@ -20,6 +20,7 @@
   lowdown,
   stdenv,
   libcap,
+  zstd,
   # updateScript dependencies (passthru only; not used by the build itself).
   writeShellApplication,
   curl,
@@ -171,6 +172,7 @@ rustPlatform.buildRustPackage {
     nettle
     pam
     libcap
+    zstd
   ];
 
   strictDeps = true;
