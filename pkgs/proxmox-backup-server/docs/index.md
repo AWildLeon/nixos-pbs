@@ -14,12 +14,10 @@ specific to the NixOS port.
 
 ## Heads up: this is an unofficial port
 
-This packaging is **experimental and unofficial**. It is not supported by
+This packaging is **unofficial**. It is not supported by
 Proxmox Server Solutions GmbH, so please do not contact Proxmox support about
 it. Report problems on the
-[project issue tracker](https://github.com/AWildLeon/nixos-pbs/issues) instead,
-and test on something you can afford to lose before trusting it with real
-backups.
+[project issue tracker](https://github.com/AWildLeon/nixos-pbs/issues) instead.
 
 ## How this port differs
 
@@ -112,10 +110,11 @@ To install the port on your own host, or to see the module options, read the
 
 ## Status and limitations
 
-The package builds and the core services run, but several areas still need
-real-world testing:
+The standard feature set (local datastores, backup, restore, sync, verify,
+prune, garbage collection) has been in real-world use for months without
+issues. Some areas are not actively used and may have untested edge cases:
 
-- Backup, restore, sync, and garbage collection under real workloads.
+- S3-backed datastores.
 - PAM and authentication beyond a basic `root@pam` login.
 - Anything that assumes a Debian-style host.
 
@@ -125,6 +124,5 @@ place, but it has not been exercised on this port and is not expected to work
 as-is. If you need tape, please open an
 [issue](https://github.com/AWildLeon/nixos-pbs/issues) so it can be looked at.
 
-Feedback is the fastest way to move this from experimental to trusted. If you
-run it, please report results, good or bad, on the
+If you run into anything, please report results, good or bad, on the
 [issue tracker](https://github.com/AWildLeon/nixos-pbs/issues).

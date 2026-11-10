@@ -1,5 +1,5 @@
 {
-  description = "Experimental native Nix package/module for Proxmox Backup Server";
+  description = "Native Nix package/module for Proxmox Backup Server";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 

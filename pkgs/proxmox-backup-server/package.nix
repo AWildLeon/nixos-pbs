@@ -63,7 +63,7 @@ let
   # is the unofficial NixOS packaging. The two notices differ in their leading
   # text (one carries an <a> tag, the other a {0} placeholder), so we keep the
   # full source strings and reuse the shared note.
-  unsupportedNote = "<br><br><b>Unsupported NixOS port:</b> this native NixOS setup is experimental and completely unsupported by Proxmox Server Solutions GmbH. Do not contact Proxmox support for issues with this packaging.";
+  unsupportedNote = "<br><br><b>Unsupported NixOS port:</b> this native NixOS setup is completely unsupported by Proxmox Server Solutions GmbH. Do not contact Proxmox support for issues with this packaging.";
   subscriptionMsgUI = ''You do not have a valid subscription for this server. Please visit <a target="_blank" href="https://www.proxmox.com/proxmox-backup-server/pricing">www.proxmox.com</a> to get a list of available options.'';
   subscriptionMsgLib = "You do not have a valid subscription for this server. Please visit {0} to get a list of available options.";
 in
@@ -282,7 +282,7 @@ rustPlatform.buildRustPackage {
   });
 
   meta = {
-    description = "Proxmox Backup Server (experimental native NixOS package, base build)";
+    description = "Proxmox Backup Server (native NixOS package, base build)";
     longDescription = ''
       The raw PBS build. Because PBS hardcodes Debian FHS paths at runtime, run it
       via the proxmox-backup-server-fhs package (or the NixOS module), not directly.
