@@ -124,5 +124,6 @@ place, but it has not been exercised on this port and is not expected to work
 as-is. If you need tape, please open an
 [issue](https://github.com/AWildLeon/nixos-pbs/issues) so it can be looked at.
 
-If you run into anything, please report results, good or bad, on the
-[issue tracker](https://github.com/AWildLeon/nixos-pbs/issues).
+If something is missing or broken, please
+[open an issue](https://github.com/AWildLeon/nixos-pbs/issues/new) with logs and
+steps to reproduce.

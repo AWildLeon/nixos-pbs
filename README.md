@@ -315,8 +315,7 @@ scripts/                           # run-vm.sh, dev-loop.sh
 
 The standard feature set (local datastores, backup, restore, sync, verify, prune, GC,
 declarative config) has been in real-world use for months without issues. Some areas are
-not actively used and may have untested edge cases, each with a
-[tracking issue](../../issues):
+not actively used and may have untested edge cases:
 
 - **S3-backed datastores** have not been exercised on this port.
 - PAM / authentication beyond a basic `root@pam` login.
@@ -326,8 +325,8 @@ not actively used and may have untested edge cases, each with a
   `pmt`, `pmtx`, `sg-tape-cmd`) is built and the UI is left in place, but nobody has tried
   it on this port. If you need tape, please open an issue.
 
-Feedback is welcome, good or bad: 👍/👎, logs or edge cases on the relevant issue, or a new
-one.
+If something is missing or broken, please [open an issue](../../issues/new) with logs and
+steps to reproduce.
 
 ### Roadmap
 
