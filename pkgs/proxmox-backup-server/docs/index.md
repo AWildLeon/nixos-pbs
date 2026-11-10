@@ -111,11 +111,10 @@ To install the port on your own host, or to see the module options, read the
 ## Status and limitations
 
 The standard feature set (local datastores, backup, restore, sync, verify,
-prune, garbage collection) has been in real-world use for months without
+prune, garbage collection, PAM login) has been in real-world use for months without
 issues. Some areas are not actively used and may have untested edge cases:
 
 - S3-backed datastores.
-- PAM and authentication beyond a basic `root@pam` login.
 - Anything that assumes a Debian-style host.
 
 **Tape backup is untested and likely does not work.** The tape tooling
