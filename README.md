@@ -313,12 +313,12 @@ scripts/                           # run-vm.sh, dev-loop.sh
 
 ## Status & limitations
 
-The standard feature set (local datastores, backup, restore, sync, verify, prune, GC, PAM login,
+The standard feature set (local datastores, backup, restore, sync, verify, prune, GC, PAM login, docs,
 declarative config) has been in real-world use for months without issues. Some areas are
 not actively used and may have untested edge cases:
 
 - **S3-backed datastores** have not been exercised on this port.
-- Generated docs and manpages.
+- Generated manpages.
 - Assumptions that only hold on Debian-style hosts.
 - **Tape backup is untested and likely does not work.** The tooling (`proxmox-tape`,
   `pmt`, `pmtx`, `sg-tape-cmd`) is built and the UI is left in place, but nobody has tried
